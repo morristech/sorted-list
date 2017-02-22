@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 
 import org.junit.Before;
@@ -118,12 +119,16 @@ public class SortedListTest {
 	
 	@Test
 	public void containsAllElements() {
+		assertThat(sortedList.containsAll(null), is(false));
+		assertThat(sortedList.containsAll(Collections.emptyList()), is(false));
 		assertThat(sortedList.containsAll(Arrays.asList(1, 2, 3)), is(true));
 	}
 	
 	@Test
 	public void addAllElements() {
-		boolean listHasChanged = sortedList.addAll(Arrays.asList(12, 5, 9));
+		boolean listHasChanged = sortedList.addAll(null);
+		
+		listHasChanged = sortedList.addAll(Arrays.asList(12, 5, 9));
 		assertThat(listHasChanged, is(true));
 		assertThat(list, hasSize(8));
 		assertThat(list, contains(1, 2, 3, 5, 6, 7, 9, 12));
