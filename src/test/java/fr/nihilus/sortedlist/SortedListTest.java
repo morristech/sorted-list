@@ -106,10 +106,14 @@ public class SortedListTest {
 				listHasChanged, is(true));
 		assertThat(list, contains(1, 3, 6, 7));
 		
+		listHasChanged = sortedList.remove(Integer.valueOf(6));
+		assertThat(listHasChanged, is(true));
+		assertThat(list, contains(1, 3, 7));
+		
 		listHasChanged = sortedList.remove(Integer.valueOf(12));
 		assertThat("must return false if the item to remove is not present", 
 				listHasChanged, is(false));
-		assertThat(list, contains(1, 3, 6, 7));
+		assertThat(list, contains(1, 3, 7));
 	}
 	
 	@Test
@@ -123,6 +127,11 @@ public class SortedListTest {
 		assertThat(listHasChanged, is(true));
 		assertThat(list, hasSize(8));
 		assertThat(list, contains(1, 2, 3, 5, 6, 7, 9, 12));
+		
+		listHasChanged = sortedList.addAll(Arrays.asList(3, 9, 5));
+		assertThat(listHasChanged, is(true));
+		assertThat(list, hasSize(11));
+		assertThat(list, contains(1, 2, 3, 3, 5, 5, 6, 7, 9, 9, 12));
 	}
 	
 	@Test

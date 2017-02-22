@@ -7,22 +7,30 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 /**
- * This List implementation sorts its items as they are inserted.
- * This is particularly efficient for lists that contains few items.
- * @author Thib
+ * This List implementation sorts its items as they are inserted. This is
+ * particularly efficient for lists that contains few items. For ordering
+ * purposes, this list does not support null elements.
+ * 
+ * @author Thibault Seisel
  *
  * @param <E>
+ *            Type of elements contained in the list.
  */
 public class SortedList<E> extends AbstractList<E> {
 
 	private final ArrayList<E> list;
 	private final Comparator<? super E> sorting;
 
+	/**
+	 * 
+	 * @param comparator
+	 *            Comparison function used for ordering items in the list.
+	 */
 	public SortedList(Comparator<? super E> comparator) {
 		this.list = new ArrayList<>();
 		this.sorting = comparator;
 	}
-	
+
 	SortedList(ArrayList<E> list, Comparator<? super E> comparator) {
 		list.sort(comparator);
 		this.list = list;
@@ -35,12 +43,16 @@ public class SortedList<E> extends AbstractList<E> {
 	}
 
 	/**
-	 * Returns true if the list contains the specified element.
-	 * This implementation binary searches the specified element in the list 
-	 * using the comparison function provided at construction.
+	 * Returns true if the list contains the specified element. This
+	 * implementation binary searches the specified element in the list using
+	 * the comparison function provided at construction.
+	 * 
 	 * @return true if the list contains the specified element.
-	 * @throws ClassCastException if the type of the specified element is incompatible with this list.
-	 * @throws NullPointerException if the specified element is null.
+	 * @throws ClassCastException
+	 *             - if the type of the specified element is incompatible with
+	 *             this list.
+	 * @throws NullPointerException
+	 *             - if the specified element is null.
 	 */
 	@Override
 	public boolean contains(Object o) {
@@ -48,7 +60,7 @@ public class SortedList<E> extends AbstractList<E> {
 		if (o == null) {
 			return false;
 		}
-		
+
 		// En cas d'erreur de cast, lance une ClassCastException comme prévu.
 		@SuppressWarnings("unchecked")
 		E el = (E) o;
@@ -67,50 +79,84 @@ public class SortedList<E> extends AbstractList<E> {
 	}
 
 	/**
-	 * Add the specified element to the list. 
-	 * Note that unlike common List implementations, 
-	 * this implementation does not append the element at the end of the list;
-	 * instead, this element's position within the list is determined by the comparison 
-	 * function provided to this list at construction.
+	 * Add the specified element to the list. Note that unlike common List
+	 * implementations, this implementation does not append the element at the
+	 * end of the list; instead, this element's position within the list is
+	 * determined by the comparison function provided to this list at
+	 * construction.
+	 * 
+	 * @param e The element to insert into this list.
+	 * 
 	 * @returns <code>true</code> as specified by Collection.add(E).
-	 * @throws NullPointerException if the specified element is null.
+	 * @throws NullPointerException
+	 *             - if the specified element is null.
 	 */
 	@Override
 	public boolean add(E e) {
-		// On n'accepte pas les éléments null.
 		if (e == null) {
 			throw new NullPointerException("This list implementation does not support null elements.");
 		}
-		
+
 		int low = 0;
 		int high = list.size() - 1;
-		int index;
 		while (low <= high) {
 			int middle = low + (high - low) / 2;
 			E median = list.get(middle);
-			// TODO Insert-sort
-			
+			if (sorting.compare(e, median) < 0) {
+				// Plus petit strictement que le milieu
+				high = middle - 1;
+			} else if (sorting.compare(e, median) > 0) {
+				low = middle + 1;
+			} else {
+				// Ils sont égaux, on le place à cet endroit
+				list.add(middle, e);
+				return true;
+			}
+
 		}
-		return list.add(e);
+		// On n'a pas trouvé d'élément égal, donc on le place à low
+		list.add(low, e);
+		return true;
 	}
 
 	/**
-	 * Add the specified element to the list.
-	 * Note that unlike common List implementations, 
-	 * this implementation does not append the element at the end of the list;
-	 * instead, this element's position within the list is determined by the comparison 
-	 * function provided to this list at construction, ignoring the <code>index</code> parameter.
+	 * Add the specified element to the list. Note that unlike common List
+	 * implementations, this implementation does not append the element at the
+	 * end of the list; instead, this element's position within the list is
+	 * determined by the comparison function provided to this list at
+	 * construction, ignoring the <code>index</code> parameter.
+	 * @param index Ignored parameter
+	 * @param element The element to insert into this list
 	 */
 	@Override
 	public void add(int index, E element) {
 		this.add(element);
 	}
-	
+
+	/**
+	 * Removes the element at the specified position in the list. Shifts any
+	 * subsequent elements to the left (subtracts one from their indices).
+	 * 
+	 * @return the element that was removed from the list.
+	 * @throws ArrayIndexOutOfBoundsException
+	 *             - if the index is out of range (index < 0 || index >= size())
+	 */
 	@Override
 	public E remove(int index) {
 		return list.remove(index);
 	}
 
+	/**
+	 * Remove the first occurrence of the specified element from the list, if it
+	 * is present. This implementation binary searches for the specified element
+	 * using the comparison function provided at construction, and removes it if
+	 * it is found.
+	 * 
+	 * @return <code>true</code> if an element has been removed as a result of
+	 *         this call
+	 * @throws ClassCastException
+	 *             - if the specified element is not compatible with this list
+	 */
 	@Override
 	public boolean remove(Object o) {
 		@SuppressWarnings("unchecked")
@@ -134,13 +180,13 @@ public class SortedList<E> extends AbstractList<E> {
 
 	@Override
 	public boolean addAll(Collection<? extends E> c) {
-		boolean listChanged = false;
+		boolean hasChanged = false;
 		for (E e : c) {
-			listChanged = listChanged || add(e);
+			hasChanged = add(e) || hasChanged;
 		}
-		return listChanged;
+		return hasChanged;
 	}
-	
+
 	@Override
 	public boolean addAll(int index, Collection<? extends E> c) {
 		return this.addAll(c);
@@ -148,11 +194,11 @@ public class SortedList<E> extends AbstractList<E> {
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		boolean listChanged = false;
+		boolean hasChanged = false;
 		for (Object o : c) {
-			listChanged = listChanged || this.remove(o);
+			hasChanged = this.remove(o) || hasChanged; 
 		}
-		return listChanged;
+		return hasChanged;
 	}
 
 	@Override
@@ -188,13 +234,13 @@ public class SortedList<E> extends AbstractList<E> {
 	@Override
 	public int indexOf(Object o) {
 		if (o == null) {
-			throw new NullPointerException("This list implementation does not support null elements.");
+			return -1;
 		}
 		@SuppressWarnings("unchecked")
 		E el = (E) o;
 		return binarySearch(el);
 	}
-	
+
 	@Override
 	public Iterator<E> iterator() {
 		return list.iterator();
