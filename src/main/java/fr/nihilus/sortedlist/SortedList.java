@@ -269,8 +269,9 @@ public class SortedList<E> extends AbstractList<E> {
 	
 	/**
 	 * Sorts this list according to the order induced by the specified Comparator.
-	 * When used on this implementation, this method will change the comparison function 
+	 * When used on this implementation, this method also changes the comparison function 
 	 * used to sort this list's elements.
+	 * @param c The new comparison function to use to sort items.
 	 */
 	@Override
 	public void sort(Comparator<? super E> c) {

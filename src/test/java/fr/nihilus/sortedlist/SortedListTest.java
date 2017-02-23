@@ -21,13 +21,13 @@ public class SortedListTest {
 			return Integer.compare(o1, o2);
 		}
 	};
-	
+
 	private ArrayList<Integer> list;
 	private SortedList<Integer> sortedList;
-	
+
 	@Rule
 	public Timeout globalTimeout = Timeout.millis(200);
-	
+
 	@Before
 	public void initList() {
 		list = new ArrayList<>(5);
@@ -36,29 +36,28 @@ public class SortedListTest {
 
 		assertThat(list, contains(1, 2, 3, 6, 7));
 	}
-	
+
 	@Test
 	public void clear() {
 		sortedList.clear();
 		assertThat(list, hasSize(0));
 	}
-	
+
 	@Test
 	public void containsElement() {
 		assertThat(sortedList.contains(1), is(true));
 		assertThat(sortedList.contains(3), is(true));
 		assertThat(sortedList.contains(4), is(false));
-		assertThat("cannot contain null elements", 
-				sortedList.contains(null), is(false));
+		assertThat("cannot contain null elements", sortedList.contains(null), is(false));
 	}
-	
+
 	@Test
 	public void isEmpty() {
 		assertThat(sortedList, is(not(empty())));
 		list.clear();
 		assertThat(sortedList, is(empty()));
 	}
-	
+
 	@Test
 	public void size() {
 		assertThat(sortedList, hasSize(5));
@@ -67,93 +66,100 @@ public class SortedListTest {
 		list.removeAll(Arrays.asList(2, 3, 8));
 		assertThat(sortedList, hasSize(3));
 	}
-	
+
 	@Test(expected = NullPointerException.class)
 	public void addNull() {
 		sortedList.add(null);
 	}
-	
+
 	@Test
 	public void addElement() {
 		boolean listHasChanged = sortedList.add(0);
 		assertThat(listHasChanged, is(true));
 		assertThat(list, contains(0, 1, 2, 3, 6, 7));
-		
+
 		listHasChanged = sortedList.add(4);
 		assertThat(listHasChanged, is(true));
 		assertThat(list, contains(0, 1, 2, 3, 4, 6, 7));
-		
+
 		listHasChanged = sortedList.add(2);
 		assertThat(listHasChanged, is(true));
 		assertThat(list, contains(0, 1, 2, 2, 3, 4, 6, 7));
 	}
-	
-	
+
 	@Test
 	public void removeIndex() {
 		Integer removedValue = sortedList.remove(0);
 		assertThat(removedValue, is(1));
 	}
-	
+
 	@Test(expected = ClassCastException.class)
 	public void removeElementIncompatibleType() {
 		sortedList.remove("6");
 	}
-	
+
 	@Test
 	public void removeElement() {
 		boolean listHasChanged = sortedList.remove(Integer.valueOf(2));
-		assertThat("must return true if an item has been removed", 
-				listHasChanged, is(true));
+		assertThat("must return true if an item has been removed", listHasChanged, is(true));
 		assertThat(list, contains(1, 3, 6, 7));
-		
+
 		listHasChanged = sortedList.remove(Integer.valueOf(6));
 		assertThat(listHasChanged, is(true));
 		assertThat(list, contains(1, 3, 7));
-		
+
 		listHasChanged = sortedList.remove(Integer.valueOf(12));
-		assertThat("must return false if the item to remove is not present", 
-				listHasChanged, is(false));
+		assertThat("must return false if the item to remove is not present", listHasChanged, is(false));
 		assertThat(list, contains(1, 3, 7));
 	}
-	
+
 	@Test
 	public void containsAllElements() {
 		assertThat(sortedList.containsAll(null), is(false));
 		assertThat(sortedList.containsAll(Collections.emptyList()), is(false));
 		assertThat(sortedList.containsAll(Arrays.asList(1, 2, 3)), is(true));
 	}
-	
+
 	@Test
 	public void addAllElements() {
 		boolean listHasChanged = sortedList.addAll(null);
-		
+		assertThat(listHasChanged, is(false));
+
+		listHasChanged = sortedList.addAll(Collections.<Integer>emptyList());
+		assertThat(listHasChanged, is(false));
+
 		listHasChanged = sortedList.addAll(Arrays.asList(12, 5, 9));
 		assertThat(listHasChanged, is(true));
 		assertThat(list, hasSize(8));
 		assertThat(list, contains(1, 2, 3, 5, 6, 7, 9, 12));
-		
+
 		listHasChanged = sortedList.addAll(Arrays.asList(3, 9, 5));
 		assertThat(listHasChanged, is(true));
 		assertThat(list, hasSize(11));
 		assertThat(list, contains(1, 2, 3, 3, 5, 5, 6, 7, 9, 9, 12));
 	}
-	
+
 	@Test
 	public void removeAllElements() {
-		boolean listHasChanged = sortedList.removeAll(Arrays.asList(1, 3, 7));
+		boolean listHasChanged = sortedList.removeAll(null);
+		assertThat(listHasChanged, is(false));
+
+		listHasChanged = sortedList.addAll(Collections.<Integer>emptyList());
+		assertThat(listHasChanged, is(false));
+
+		listHasChanged = sortedList.removeAll(Arrays.asList(1, 3, 7));
 		assertThat(listHasChanged, is(true));
 		assertThat(list, contains(2, 6));
-		
+
 		listHasChanged = sortedList.removeAll(Arrays.asList(2, 7));
 		assertThat(listHasChanged, is(true));
 		assertThat(list, contains(6));
-		
+
 		listHasChanged = sortedList.removeAll(Arrays.asList(1, 3, 7));
 		assertThat(listHasChanged, is(false));
 		assertThat(list, contains(6));
 	}
-	
+
 	@Test
 	public void toArray() {
 		Object[] array = sortedList.toArray();
@@ -162,18 +168,38 @@ public class SortedListTest {
 			assertThat(valueAtI, equalTo(list.get(i)));
 		}
 	}
-	
+
 	@Test
 	public void toTypedArray() {
 		Integer[] array = sortedList.toArray(new Integer[0]);
 		assertThat(array, is(arrayContaining(1, 2, 3, 6, 7)));
 	}
-	
+
 	@Test
 	public void getIndex() {
 		Integer actual = sortedList.get(3);
 		Integer expected = list.get(3);
 		assertThat(actual, equalTo(expected));
 	}
-	
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void setAtIndex() {
+		sortedList.set(0, Integer.valueOf(10));
+	}
+
+	@Test
+	public void sort() {
+		sortedList.sort(Collections.reverseOrder(SORTING_ASC));
+		assertThat(list, contains(7, 6, 3, 2, 1));
+
+		sortedList.add(12);
+		assertThat(list, contains(12, 7, 6, 3, 2, 1));
+	}
+
+	@Test
+	public void indexOfElement() {
+		assertThat(sortedList.indexOf(1), is(0));
+		assertThat(sortedList.indexOf(3), is(2));
+		assertThat(sortedList.indexOf(12), is(-1));
+	}
 }
